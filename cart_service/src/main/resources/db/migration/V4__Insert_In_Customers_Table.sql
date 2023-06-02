@@ -8,5 +8,8 @@ BEGIN
 
         INSERT INTO customers (name, created_at, updated_at)
         VALUES (customer_name, now(), now());
+
+        INSERT INTO carts(id, customer_id, created_at, updated_at)
+        VALUES (gen_random_uuid(), i, now(), now());
     END LOOP;
 END $$;

@@ -6,32 +6,27 @@ import com.cart_service.repos.CartItemRepository;
 import com.cart_service.repos.CartRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class CarService {
+public class CartService {
 
-    private  final CartItemRepository cartItemRepository;
     private  final CartRepository cartRepository;
 
-    public CarService(CartItemRepository cartItemRepository, CartRepository cartRepository) {
-        this.cartItemRepository = cartItemRepository;
+    public CartService(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
 
-    public Cart createCart(Cart cart, List<CartItems> cartItems){
-
+    public Cart addItemsToCart(int customerId, Set<CartItems> cartItems) {
+        Cart cart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
         for (CartItems cartItem : cartItems) {
             cartItem.setId(UUID.randomUUID());
-
+            cartItem.setCart(cart);
         }
         cart.setCartItems(cartItems);
-        return  cartRepository.save(cart);
-
-
-
-
+        cartRepository.save(cart);
+        return cart;
     }
 
 

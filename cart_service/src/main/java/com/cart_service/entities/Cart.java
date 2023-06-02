@@ -8,7 +8,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 @Getter
 @Setter
@@ -39,10 +41,7 @@ public class Cart {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "cart")
-    private List<CartItems> cartItems;
-
-
-
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    private Set<CartItems> cartItems = new HashSet<>();
 
 }
