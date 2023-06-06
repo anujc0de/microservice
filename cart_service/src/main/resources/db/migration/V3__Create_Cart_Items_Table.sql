@@ -1,6 +1,6 @@
 CREATE TABLE cart_items (
   id UUID NOT NULL PRIMARY KEY,
-  cart_id UUID NOT NULL,
+  cart_id UUID NOT NULL references carts(id),
   product_id UUID,
   quantity INT,
   price DECIMAL(10,2),

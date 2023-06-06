@@ -6,6 +6,8 @@ import com.cart_service.response.CartResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring")
 public interface CartMapper {
     CartMapper INSTANCE = Mappers.getMapper(CartMapper.class);
