@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/orders")
 @Transactional
@@ -32,7 +30,7 @@ public class OrderController {
         log.info("requested to create order");
 
         var orderItemRequest = orderRequest.getOrderItems();
-        var orderItems = orderItemMapper.orderRequestToOrderItems(orderItemRequest);
+        var orderItems = orderItemMapper.orderItemRequestsToOrderItems(orderItemRequest);
 
         var saved = orderService.createOrder(orderRequest.getCustomerId(),orderRequest.getPaymentId(),orderItems);
         return new ResponseEntity<>(orderMapper.orderToOrderResponse(saved), HttpStatus.CREATED);
