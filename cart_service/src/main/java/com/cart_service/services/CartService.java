@@ -1,7 +1,8 @@
 package com.cart_service.services;
 
 import com.cart_service.entities.Cart;
-import com.cart_service.entities.CartItems;
+import com.cart_service.entities.CartItem;
+import com.cart_service.repos.CartItemRepository;
 import com.cart_service.repos.CartRepository;
 import com.cart_service.response.InventoryResponse;
 import org.springframework.stereotype.Service;
@@ -14,16 +15,18 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final WebClient.Builder webClientBuilder;
+    private  final CartItemRepository cartItemRepository;
 
-    public CartService(CartRepository cartRepository, WebClient.Builder webClientBuilder) {
+    public CartService(CartRepository cartRepository, WebClient.Builder webClientBuilder, CartItemRepository cartItemRepository) {
         this.cartRepository = cartRepository;
         this.webClientBuilder = webClientBuilder;
+        this.cartItemRepository = cartItemRepository;
     }
 
-    public Cart addItemsToCart(int customerId, Set<CartItems> cartItems) {
+    public Cart addItemsToCart(int customerId, Set<CartItem> cartItems) {
 
         //call inventory service  and place order in stock
-        List<UUID> productIds = cartItems.stream().map(CartItems::getProductId).toList();
+        List<UUID> productIds = cartItems.stream().map(CartItem::getProductId).toList();
 
         InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
                 .uri("http://localhost:8083/inventories",
@@ -41,7 +44,7 @@ public class CartService {
 
 
         Cart cart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
-        for (CartItems cartItem : cartItems) {
+        for (CartItem cartItem : cartItems) {
             UUID productId = cartItem.getProductId();
             int quantity = cartItem.getQuantity();
 
@@ -71,11 +74,18 @@ public class CartService {
     }
 
     public Cart clearCartItems(int customerId) {
-        Optional<Cart> optionalCart = Optional.ofNullable(getCartByCustomerId(customerId));
-        optionalCart.ifPresent(cart -> {
-            cart.getCartItems().clear();
-            cartRepository.save(cart);
-        });
-        return optionalCart.orElseThrow();
+        Cart cart = getCartByCustomerId(customerId);
+        List<CartItem> cartItems = new ArrayList<>(cart.getCartItems());
+
+        for (CartItem cartItem : cartItems) {
+            cartItem.setCart(null);
+        }
+
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+
+        cartItemRepository.deleteAll(cartItems);
+
+        return cart;
     }
 }

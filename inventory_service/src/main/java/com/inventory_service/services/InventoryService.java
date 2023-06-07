@@ -85,8 +85,8 @@ public class InventoryService {
         for (BlockInventory blockInventory : unblockInventories) {
 
              UUID productId=blockInventory.getProductId();
-             int quantity= blockInventory.getQuantity();
-             inventoryRepository.updateInventoryQuantity(productId,quantity);
+             int reduceQuantity= blockInventory.getQuantity();
+             inventoryRepository.updateInventoryQuantity(productId,reduceQuantity);
         }
         return  unblockInventories;
 

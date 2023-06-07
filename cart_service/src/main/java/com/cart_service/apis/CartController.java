@@ -48,7 +48,7 @@ public class CartController {
         log.info("requested to get carts by customerId");
 
           var fetchedCart=cartService.getCartByCustomerId(customerId);
-        return new ResponseEntity<>(cartMapper.cartToCartResponse(fetchedCart), HttpStatus.CREATED);
+       return new ResponseEntity<>(cartMapper.cartToCartResponse(fetchedCart), HttpStatus.CREATED);
     }
     @PutMapping("/customers/{customerId}/clear")
     public ResponseEntity<?> clearCart(@PathVariable(value = "customerId") int customerId) {

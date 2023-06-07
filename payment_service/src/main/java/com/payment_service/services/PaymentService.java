@@ -6,6 +6,8 @@ import com.payment_service.dto.CartItemDto;
 import com.payment_service.entities.Payment;
 import com.payment_service.inventoryRequests.BlockInventoryRequest;
 import com.payment_service.inventoryRequests.CartItem;
+import com.payment_service.orderRequests.OrderItem;
+import com.payment_service.orderRequests.OrderRequest;
 import com.payment_service.repos.PaymentRepository;
 import com.payment_service.response.BlockInventoryResponse;
 import com.payment_service.response.CartResponse;
@@ -47,11 +49,11 @@ public class PaymentService {
         }
 
 
-      var cartItems = cartResponse.getCartItems().stream()
+        var cartItems = cartResponse.getCartItems().stream()
                 .map(item -> CartItem.builder().productId(item.getProductId()).quantity(item.getQuantity()).build())
                 .collect(Collectors.toSet());
 
-        BlockInventoryRequest blockInventoryRequest=BlockInventoryRequest.builder().cartItems(cartItems).build();
+        BlockInventoryRequest blockInventoryRequest = BlockInventoryRequest.builder().cartItems(cartItems).build();
 
         BlockInventoryResponse[] blockInventoryResponses = webClientBuilder.build()
                 .post()
@@ -112,6 +114,24 @@ public class PaymentService {
                 .block();
         //create order
 
+        var orderItems = cartResponse.getCartItems().stream()
+                .map(item -> OrderItem.builder().productId(item.getProductId()).quantity(item.getQuantity()).build())
+                .collect(Collectors.toSet());
+
+        OrderRequest orderRequest = OrderRequest.builder()
+                .paymentId(payment.getId())
+                .customerId(customerId)
+                .orderItems(orderItems).build();
+
+
+        webClientBuilder.build()
+                .post()
+                .uri("http://localhost:8084/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(orderRequest), OrderRequest.class)// Set the request body
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
         log.info("Payment successful");
 

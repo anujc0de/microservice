@@ -1,19 +1,21 @@
 package com.cart_service.request;
 
-import com.cart_service.entities.CartItems;
+import com.cart_service.entities.CartItem;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartRequest {
 
     private int customerId;
 
-    private Set<CartItems> cartItems;
+    private Set<CartItem> cartItems;
 
 }

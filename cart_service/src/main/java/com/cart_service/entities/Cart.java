@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 @Getter
@@ -42,6 +41,6 @@ public class Cart {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
-    private Set<CartItems> cartItems = new HashSet<>();
+    private Set<CartItem> cartItems = new HashSet<>();
 
 }

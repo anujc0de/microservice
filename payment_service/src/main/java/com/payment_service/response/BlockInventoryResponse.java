@@ -15,7 +15,7 @@ import java.util.UUID;
 public class BlockInventoryResponse {
     private UUID id;
 
-    private int productId;
+    private UUID productId;
     private  int quantity;
 
     private Instant expiryTime;

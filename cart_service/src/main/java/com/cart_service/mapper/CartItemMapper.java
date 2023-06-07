@@ -1,6 +1,6 @@
 package com.cart_service.mapper;
 
-import com.cart_service.entities.CartItems;
+import com.cart_service.entities.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -11,6 +11,6 @@ public interface CartItemMapper {
     CartItemMapper INSTANCE = Mappers.getMapper(CartItemMapper.class);
 
 
-    Set<CartItems> cartRequestToCartItems(Set<CartItems> cartItems);
+    Set<CartItem> cartRequestToCartItems(Set<CartItem> cartItems);
 
 }

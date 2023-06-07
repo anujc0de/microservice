@@ -13,7 +13,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
     List<Inventory> findByProductIdIn(List<UUID> productIds);
 
     @Modifying
-    @Query(value = "UPDATE inventories SET quantity = quantity - :quantity WHERE product_id = :productId",nativeQuery = true)
-    void updateInventoryQuantity(@Param("productId") UUID productId, @Param("quantity") int quantity);
+    @Query(value = "UPDATE inventories SET quantity = quantity - :reduceQuantity WHERE product_id = :productId",nativeQuery = true)
+    void updateInventoryQuantity(@Param("productId") UUID productId, @Param("reduceQuantity") int reduceQuantity);
 
 }

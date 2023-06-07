@@ -15,6 +15,7 @@ public class CartItemDto {
     private UUID id;
     private UUID productId;
     private int quantity;
+    private  float price;
 
     private Instant createdAt;
 
