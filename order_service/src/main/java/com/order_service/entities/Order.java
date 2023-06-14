@@ -35,12 +35,16 @@ public class Order {
     private UUID paymentId;
 
     @Column
+    private OrderStatus orderStatus;
+
+    @Column
     @CreatedDate
     private Instant createdAt;
 
     @Column
     @LastModifiedDate
     private Instant updatedAt;
+
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItem> orderItems = new HashSet<>();

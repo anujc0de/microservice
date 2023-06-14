@@ -8,8 +8,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 
@@ -37,6 +35,8 @@ public class Payment {
     @Column
     private float amount;
 
+    @Column
+    private PaymentStatus paymentStatus;
     @Column
     @CreatedDate
     private Instant createdAt;
