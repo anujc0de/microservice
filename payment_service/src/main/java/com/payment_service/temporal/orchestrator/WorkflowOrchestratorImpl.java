@@ -5,6 +5,7 @@ import com.common.model.PaymentDto;
 import com.payment_service.config.ApplicationProperties;
 import com.payment_service.entities.Payment;
 import com.payment_service.orchestration.WorkflowOrchestrator;
+import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
 import com.payment_service.temporal.workflow.impl.PaymentFulfillmentWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
@@ -24,7 +25,7 @@ public class WorkflowOrchestratorImpl implements WorkflowOrchestrator {
     var workflowClient = workflowOrchestratorClient.getWorkflowClient();
     var orderFulfillmentWorkflow =
         workflowClient.newWorkflowStub(
-            PaymentFulfillmentWorkflowImpl.class,
+            PaymentFulfillmentWorkflow.class,
             WorkflowOptions.newBuilder()
                 .setWorkflowId(applicationProperties.getWorkflowId() + "-" + paymentDto.getId())
                 .setTaskQueue(TaskQueue.PAYMENT_FULFILLMENT_WORKFLOW_TASK_QUEUE.name())

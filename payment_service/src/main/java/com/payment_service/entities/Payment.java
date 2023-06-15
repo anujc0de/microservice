@@ -36,7 +36,7 @@ public class Payment {
     private float amount;
 
     @Column
-    private PaymentStatus paymentStatus;
+    private String paymentStatus;
     @Column
     @CreatedDate
     private Instant createdAt;

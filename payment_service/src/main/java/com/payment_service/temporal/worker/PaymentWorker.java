@@ -4,6 +4,7 @@ import com.common.TaskQueue;
 import com.common.activities.PaymentActivities;
 import com.payment_service.temporal.orchestrator.WorkflowOrchestratorClient;
 import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
+import com.payment_service.temporal.workflow.impl.PaymentFulfillmentWorkflowImpl;
 import io.temporal.worker.WorkerFactory;
 import io.temporal.worker.WorkerOptions;
 import io.temporal.worker.WorkflowImplementationOptions;
@@ -38,7 +39,7 @@ public class PaymentWorker {
 
     // Can be called multiple times
     worker.registerWorkflowImplementationTypes(
-        workflowImplementationOptions, PaymentFulfillmentWorkflow.class);
+        workflowImplementationOptions, PaymentFulfillmentWorkflowImpl.class);
 
     worker.registerActivitiesImplementations(paymentActivities);
 
