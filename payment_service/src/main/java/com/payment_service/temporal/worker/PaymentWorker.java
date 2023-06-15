@@ -1,22 +1,21 @@
 package com.payment_service.temporal.worker;
 
-import dev.techdozo.common.TaskQueue;
-import dev.techdozo.common.activities.OrderActivities;
-import dev.techdozo.order.infrastructure.temporal.orchestrator.WorkflowOrchestratorClient;
-import dev.techdozo.order.infrastructure.temporal.workflow.impl.OrderFulfillmentWorkflowImpl;
+import com.common.TaskQueue;
+import com.common.activities.PaymentActivities;
+import com.payment_service.temporal.orchestrator.WorkflowOrchestratorClient;
+import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
 import io.temporal.worker.WorkerFactory;
 import io.temporal.worker.WorkerOptions;
 import io.temporal.worker.WorkflowImplementationOptions;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.PostConstruct;
-
 @Slf4j
 @RequiredArgsConstructor
-public class OrderWorker {
+public class PaymentWorker {
 
-  private final OrderActivities orderActivities;
+  private final PaymentActivities paymentActivities;
   private final WorkflowOrchestratorClient workflowOrchestratorClient;
 
   @PostConstruct
@@ -35,16 +34,18 @@ public class OrderWorker {
     var workerFactory = WorkerFactory.newInstance(workflowClient);
     var worker =
         workerFactory.newWorker(
-            TaskQueue.ORDER_FULFILLMENT_WORKFLOW_TASK_QUEUE.name(), workerOptions);
+                TaskQueue.PAYMENT_FULFILLMENT_WORKFLOW_TASK_QUEUE.name(), workerOptions);
 
     // Can be called multiple times
     worker.registerWorkflowImplementationTypes(
-        workflowImplementationOptions, OrderFulfillmentWorkflowImpl.class);
+        workflowImplementationOptions, PaymentFulfillmentWorkflow.class);
 
-    worker.registerActivitiesImplementations(orderActivities);
+    worker.registerActivitiesImplementations(paymentActivities);
 
     workerFactory.start();
 
     log.info("Registering order worker..");
   }
 }
+
+

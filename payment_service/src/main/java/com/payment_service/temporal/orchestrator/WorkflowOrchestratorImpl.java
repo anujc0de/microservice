@@ -1,14 +1,11 @@
 package com.payment_service.temporal.orchestrator;
 
+import com.common.TaskQueue;
+import com.common.model.PaymentDto;
 import com.payment_service.config.ApplicationProperties;
 import com.payment_service.entities.Payment;
 import com.payment_service.orchestration.WorkflowOrchestrator;
-import dev.techdozo.common.TaskQueue;
-import dev.techdozo.common.model.OrderDTO;
-import dev.techdozo.order.application.domain.model.Order;
-import dev.techdozo.order.application.orchestration.WorkflowOrchestrator;
-import dev.techdozo.order.common.config.ApplicationProperties;
-import dev.techdozo.order.infrastructure.temporal.workflow.OrderFulfillmentWorkflow;
+import com.payment_service.temporal.workflow.impl.PaymentFulfillmentWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import lombok.RequiredArgsConstructor;
@@ -22,28 +19,26 @@ public class WorkflowOrchestratorImpl implements WorkflowOrchestrator {
   @Override
   public void makePayment(Payment payment) {
 
-    var payment = map(payment);
+    var paymentDto = map(payment);
 
     var workflowClient = workflowOrchestratorClient.getWorkflowClient();
     var orderFulfillmentWorkflow =
         workflowClient.newWorkflowStub(
-            OrderFulfillmentWorkflow.class,
+            PaymentFulfillmentWorkflowImpl.class,
             WorkflowOptions.newBuilder()
-                .setWorkflowId(applicationProperties.getWorkflowId() + "-" + orderDTO.getOrderId())
-                .setTaskQueue(TaskQueue.ORDER_FULFILLMENT_WORKFLOW_TASK_QUEUE.name())
+                .setWorkflowId(applicationProperties.getWorkflowId() + "-" + paymentDto.getId())
+                .setTaskQueue(TaskQueue.PAYMENT_FULFILLMENT_WORKFLOW_TASK_QUEUE.name())
                 .build());
     // Execute Sync
     //    orderFulfillmentWorkflow.createOrder(orderDTO);
     // Async execution
-    WorkflowClient.start(orderFulfillmentWorkflow::createOrder, orderDTO);
+    WorkflowClient.start(orderFulfillmentWorkflow::makePayment, paymentDto);
   }
 
-  private OrderDTO map(Order order) {
-    var orderDTO = new OrderDTO();
-    orderDTO.setOrderId(order.getOrderId());
-    orderDTO.setProductId(order.getProductId());
-    orderDTO.setPrice(order.getPrice());
-    orderDTO.setQuantity(order.getQuantity());
-    return orderDTO;
+  private PaymentDto map(Payment payment) {
+    var paymentDTO = new PaymentDto();
+    paymentDTO.setId(payment.getId());
+    paymentDTO.setCustomerId(payment.getCustomerId());
+    return paymentDTO;
   }
 }

@@ -18,7 +18,6 @@ public class PaymentCommandImpl implements PaymentCommand {
 
   private final PaymentRepository paymentRepository;
   private final WorkflowOrchestrator workflowOrchestrator;
-  private  final PaymentFactory paymentFactory;
 
 
   @Override

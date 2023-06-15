@@ -2,11 +2,9 @@ package com.cart_service.mapper;
 
 
 import com.cart_service.entities.Cart;
-import com.cart_service.response.CartResponse;
+import com.common.response.CartResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-
-import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {

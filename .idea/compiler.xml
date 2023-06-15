@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="product_service" />
+        <module name="common_service" />
       </profile>
       <profile name="Annotation profile for microservice" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -23,15 +24,6 @@
         <module name="cart_service" />
         <module name="order_service" />
         <module name="payment_service" />
-      </profile>
-      <profile name="Annotation profile for common_service" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.26/lombok-1.18.26.jar" />
-        </processorPath>
-        <module name="common_service" />
       </profile>
     </annotationProcessing>
   </component>
