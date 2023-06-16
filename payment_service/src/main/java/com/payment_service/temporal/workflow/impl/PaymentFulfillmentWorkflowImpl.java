@@ -2,6 +2,8 @@ package com.payment_service.temporal.workflow.impl;
 
 import com.common.TaskQueue;
 import com.common.activities.*;
+import com.common.error.ServiceException;
+import com.common.model.CartItemDto;
 import com.common.model.PaymentDto;
 import com.common.response.CartResponse;
 import com.payment_service.inventoryRequests.CartItem;
@@ -27,6 +29,11 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
                     .setTaskQueue(TaskQueue.CART_ACTIVITY_TASK_QUERY.name())
                     .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
+    private final ActivityOptions localActivityOptions =
+            ActivityOptions.newBuilder()
+                    .setStartToCloseTimeout(Duration.ofMinutes(1))
+                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(10).build())
+                    .build();
 
 //    private final ActivityOptions shippingActivityOptions =
 //            ActivityOptions.newBuilder()
@@ -47,14 +54,9 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //                    .setTaskQueue(TaskQueue.INVENTORY_ACTIVITY_TASK_QUEUE.name())
 //                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
 //                    .build();
-    private final LocalActivityOptions localActivityOptions =
-            LocalActivityOptions.newBuilder()
-                    .setStartToCloseTimeout(Duration.ofMinutes(1))
-                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(10).build())
-                    .build();
 
     private final PaymentActivities paymentActivities =
-            Workflow.newLocalActivityStub(PaymentActivities.class, localActivityOptions);
+            Workflow.newActivityStub(PaymentActivities.class, localActivityOptions);
 
     private final CartActivities cartActivities =
             Workflow.newActivityStub(CartActivities.class, cartActivityOptions);
@@ -71,9 +73,12 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
     @Override
     public void makePayment(PaymentDto paymentDto) {
         // Configure SAGA to run compensation activities in parallel
-        Saga.Options sagaOptions = new Saga.Options.Builder().setParallelCompensation(true).build();
+        Saga.Options sagaOptions = new Saga.Options.Builder().setParallelCompensation(false).build();
         Saga saga = new Saga(sagaOptions);
         try {
+
+            saga.addCompensation(
+                    () -> System.out.println("Other compensation logic in main workflow."));
             CartResponse cartResponse= cartActivities.getCart(paymentDto.getCustomerId());
 
             var cartItems = cartResponse.getCartItems().stream()
@@ -81,6 +86,9 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
                     .collect(Collectors.toSet());
             System.out.println(cartItems);
 
+            float totalAmount = (float) cartResponse.getCartItems().stream().mapToDouble(CartItemDto::getPrice).sum();
+
+            saga.addCompensation(cartActivities::failCart);
 //            paymentActivities.debitPayment(paymentDto);
 //            saga.addCompensation(paymentActivities::reversePayment, paymentDto);
 //            //Inventory
@@ -90,11 +98,21 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //            shippingActivities.shipGoods(paymentDto);
 //            saga.addCompensation(shippingActivities::cancelShipment, paymentDto);
 //            //Order
-//            orderActivities.completeOrder(paymentDto);
-//            saga.addCompensation(orderActivities::failOrder, paymentDto);
-        } catch (ActivityFailure cause) {
+            paymentActivities.completePayment(paymentDto,totalAmount);
+
+            logger.info("adding failed compesation");
+
+            saga.addCompensation(paymentActivities::failPayment,paymentDto,totalAmount);
+
+
+
+
+
+
+        } catch (Exception e) {
+            System.out.println("you are comming");
+            // we catch our exception and trigger workflow compensation
             saga.compensate();
-            throw cause;
         }
     }
 }

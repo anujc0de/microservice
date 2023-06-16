@@ -5,6 +5,6 @@ import io.temporal.activity.ActivityInterface;
 
 @ActivityInterface
 public interface InventoryActivities {
-  void reserveInventory(PaymentDto paymentDTO);
+  void checkAndBlockInventories(PaymentDto paymentDTO);
   void releaseInventory(PaymentDto paymentDTO);
 }
