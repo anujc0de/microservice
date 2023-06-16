@@ -2,16 +2,13 @@ package com.payment_service.temporal.workflow.impl;
 
 import com.common.TaskQueue;
 import com.common.activities.*;
-import com.common.error.ServiceException;
 import com.common.model.CartItemDto;
 import com.common.model.PaymentDto;
 import com.common.response.CartResponse;
 import com.payment_service.inventoryRequests.CartItem;
 import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
 import io.temporal.activity.ActivityOptions;
-import io.temporal.activity.LocalActivityOptions;
 import io.temporal.common.RetryOptions;
-import io.temporal.failure.ActivityFailure;
 import io.temporal.workflow.Saga;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
@@ -25,14 +22,14 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 
     private final ActivityOptions cartActivityOptions =
             ActivityOptions.newBuilder()
-                    .setStartToCloseTimeout(Duration.ofMinutes(1))
+                    .setStartToCloseTimeout(Duration.ofSeconds(2))
                     .setTaskQueue(TaskQueue.CART_ACTIVITY_TASK_QUERY.name())
-                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
-    private final ActivityOptions localActivityOptions =
+    private final ActivityOptions paymentActivityOptions =
             ActivityOptions.newBuilder()
-                    .setStartToCloseTimeout(Duration.ofMinutes(1))
-                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(10).build())
+                    .setStartToCloseTimeout(Duration.ofSeconds(2))
+//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
 
 //    private final ActivityOptions shippingActivityOptions =
@@ -56,7 +53,7 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //                    .build();
 
     private final PaymentActivities paymentActivities =
-            Workflow.newActivityStub(PaymentActivities.class, localActivityOptions);
+            Workflow.newActivityStub(PaymentActivities.class, paymentActivityOptions);
 
     private final CartActivities cartActivities =
             Workflow.newActivityStub(CartActivities.class, cartActivityOptions);
@@ -77,9 +74,10 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
         Saga saga = new Saga(sagaOptions);
         try {
 
-            saga.addCompensation(
-                    () -> System.out.println("Other compensation logic in main workflow."));
-            CartResponse cartResponse= cartActivities.getCart(paymentDto.getCustomerId());
+            saga.addCompensation(cartActivities::failCart);
+
+            CartResponse cartResponse= cartActivities.getCartWithoutError(paymentDto.getCustomerId());
+            cartActivities.getCart(paymentDto.getCustomerId());
 
             var cartItems = cartResponse.getCartItems().stream()
                     .map(item -> CartItem.builder().productId(item.getProductId()).quantity(item.getQuantity()).build())
@@ -88,7 +86,6 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 
             float totalAmount = (float) cartResponse.getCartItems().stream().mapToDouble(CartItemDto::getPrice).sum();
 
-            saga.addCompensation(cartActivities::failCart);
 //            paymentActivities.debitPayment(paymentDto);
 //            saga.addCompensation(paymentActivities::reversePayment, paymentDto);
 //            //Inventory
@@ -113,6 +110,7 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
             System.out.println("you are comming");
             // we catch our exception and trigger workflow compensation
             saga.compensate();
+//            throw e;
         }
     }
 }

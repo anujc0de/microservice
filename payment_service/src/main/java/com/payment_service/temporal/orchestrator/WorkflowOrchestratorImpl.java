@@ -11,6 +11,8 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
+
 @RequiredArgsConstructor
 public class WorkflowOrchestratorImpl implements WorkflowOrchestrator {
 
@@ -28,6 +30,7 @@ public class WorkflowOrchestratorImpl implements WorkflowOrchestrator {
             PaymentFulfillmentWorkflow.class,
             WorkflowOptions.newBuilder()
                 .setWorkflowId(applicationProperties.getWorkflowId() + "-" + paymentDto.getId())
+                    .setWorkflowExecutionTimeout(Duration.ofSeconds(20))
                 .setTaskQueue(TaskQueue.PAYMENT_FULFILLMENT_WORKFLOW_TASK_QUEUE.name())
                 .build());
     // Execute Sync

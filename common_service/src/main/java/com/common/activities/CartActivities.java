@@ -9,8 +9,9 @@ import io.temporal.workflow.Functions;
 public interface CartActivities {
     @ActivityMethod
     CartResponse getCart(int customerId);
+    CartResponse getCartWithoutError(int customerId);
 
     @ActivityMethod
-    Functions.Proc failCart();
+    void failCart();
 
 }

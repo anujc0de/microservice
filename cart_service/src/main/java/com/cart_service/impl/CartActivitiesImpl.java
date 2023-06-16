@@ -20,7 +20,7 @@ public class CartActivitiesImpl implements CartActivities {
     @Override
     public CartResponse getCart(int customerId) {
 
-        log.info("requesting to get cart {}", customerId);
+        log.info("requesting to get cart with error {}", customerId);
         throw new RuntimeException("some error");
 
 
@@ -33,9 +33,16 @@ public class CartActivitiesImpl implements CartActivities {
     }
 
     @Override
-    public Functions.Proc failCart() {
+    public CartResponse getCartWithoutError(int customerId) {
+        log.info("requesting to get cart without error {}", customerId);
+        Cart fetchedCart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
+        log.info("Finished to get cart {}", customerId);
+        return cartMapper.cartToCartResponse(fetchedCart);
+    }
+
+    @Override
+    public void failCart() {
         log.info("failling");
-        return null;
     }
 
 
