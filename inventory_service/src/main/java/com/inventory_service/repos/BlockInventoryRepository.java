@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +17,7 @@ public interface BlockInventoryRepository extends JpaRepository<BlockInventory, 
     List<Object[]> findTotalQuantityByProductIds(@Param("productIds") List<UUID> productIds, @Param("expiryTime") Instant expiryTime);
 
     @Modifying
+//    @Transactional
     @Query(value = "UPDATE block_inventories SET expiry_time = :currentTime WHERE id IN :ids",nativeQuery = true)
     void updateExpiryTimeByIds(@Param("ids") List<UUID> ids, @Param("currentTime") Instant currentTime);
 }

@@ -7,7 +7,7 @@ import io.temporal.activity.ActivityMethod;
 @ActivityInterface
 public interface PaymentActivities {
   @ActivityMethod
-  void completePayment(PaymentDto payment,float amout);
+  void completePayment(PaymentDto payment,float amount);
   @ActivityMethod
-  void failPayment(PaymentDto payment,float amount);
+  void failPayment(PaymentDto payment);
 }

@@ -13,6 +13,7 @@ import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.failure.ActivityFailure;
 import io.temporal.failure.ApplicationFailure;
+import io.temporal.workflow.Async;
 import io.temporal.workflow.Saga;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
@@ -84,6 +85,8 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
         try {
 
 
+            saga.addCompensation(paymentActivities::failPayment, paymentDto);
+
             CartResponse cartResponse= cartActivities.getCart(paymentDto.getCustomerId());
 
             var cartItems = cartResponse.getCartItems().stream()
@@ -97,13 +100,16 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
             List<BlockInventoryResponse> blockInventories = inventoryActivities.blockInventories(cartItems);
             List<UUID> blockedInventoryIds = blockInventories.stream().map(BlockInventoryResponse::getId).toList();
             saga.addCompensation(inventoryActivities::unblockInventories,blockedInventoryIds);
+
             inventoryActivities.updateInventories(blockedInventoryIds);
             saga.addCompensation(inventoryActivities::revertUpdateInventories,blockedInventoryIds);
-            inventoryActivities.unblockInventories(blockedInventoryIds);
-            saga.addCompensation(inventoryActivities::blockInventories,cartItems);
 
-
-
+            try {
+                inventoryActivities.unblockInventories(blockedInventoryIds);
+//                Async.procedure(inventoryActivities::unblockInventories, blockedInventoryIds);
+            } catch (ActivityFailure e) {
+                logger.error("Unblock failed " + e.getMessage());
+            }
 
 
 //            paymentActivities.debitPayment(paymentDto);
@@ -115,8 +121,7 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //            shippingActivities.shipGoods(paymentDto);
 //            saga.addCompensation(shippingActivities::cancelShipment, paymentDto);
 //            //Order
-            paymentActivities.completePayment(paymentDto,totalAmount);
-            saga.addCompensation(paymentActivities::failPayment,paymentDto,totalAmount);
+            paymentActivities.completePayment(paymentDto, totalAmount);
 
 //            throw new RuntimeException("blah");
 

@@ -33,9 +33,9 @@ public class PaymentActivitiesImpl implements PaymentActivities {
 
 
     @Override
-    public void failPayment(PaymentDto paymentDto, float amount) {
+    public void failPayment(PaymentDto paymentDto) {
         log.info("Marking order as failed, order id {}", paymentDto.getId());
-        var payment = map(paymentDto,amount);
+        var payment = map(paymentDto, 0);
         payment.setPaymentStatus(PaymentStatus.FAILED);
         var failedPayment = paymentRepository.save(payment);
         log.info("payment failed, {}", failedPayment);
