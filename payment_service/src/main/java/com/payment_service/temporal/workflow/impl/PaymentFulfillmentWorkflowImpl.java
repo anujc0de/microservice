@@ -22,14 +22,14 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 
     private final ActivityOptions cartActivityOptions =
             ActivityOptions.newBuilder()
-                    .setStartToCloseTimeout(Duration.ofSeconds(2))
+                    .setStartToCloseTimeout(Duration.ofMinutes(1))
                     .setTaskQueue(TaskQueue.CART_ACTIVITY_TASK_QUERY.name())
-//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
     private final ActivityOptions paymentActivityOptions =
             ActivityOptions.newBuilder()
-                    .setStartToCloseTimeout(Duration.ofSeconds(2))
-//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+                    .setStartToCloseTimeout(Duration.ofMinutes(1))
+                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
 
 //    private final ActivityOptions shippingActivityOptions =
@@ -101,6 +101,7 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 
             saga.addCompensation(paymentActivities::failPayment,paymentDto,totalAmount);
 
+//            throw new RuntimeException("blah");
 
 
 
@@ -110,7 +111,7 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
             System.out.println("you are comming");
             // we catch our exception and trigger workflow compensation
             saga.compensate();
-//            throw e;
+            throw e;
         }
     }
 }
