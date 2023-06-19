@@ -4,9 +4,7 @@ import com.cart_service.entities.Cart;
 import com.cart_service.mapper.CartMapper;
 import com.cart_service.repos.CartRepository;
 import com.common.activities.CartActivities;
-import com.common.error.ServiceException;
 import com.common.response.CartResponse;
-import io.temporal.workflow.Functions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,29 +18,12 @@ public class CartActivitiesImpl implements CartActivities {
     @Override
     public CartResponse getCart(int customerId) {
 
-        log.info("requesting to get cart with error {}", customerId);
-        throw new RuntimeException("some error");
+        throw new RuntimeException("Get Cart Failure");
 
-
+//        log.info("requesting to get cart with error {}", customerId);
 //        Cart fetchedCart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
 //        log.info("Finished to get cart {}", customerId);
-//
 //        return cartMapper.cartToCartResponse(fetchedCart);
-
-
-    }
-
-    @Override
-    public CartResponse getCartWithoutError(int customerId) {
-        log.info("requesting to get cart without error {}", customerId);
-        Cart fetchedCart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
-        log.info("Finished to get cart {}", customerId);
-        return cartMapper.cartToCartResponse(fetchedCart);
-    }
-
-    @Override
-    public void failCart() {
-        log.info("failling");
     }
 
 

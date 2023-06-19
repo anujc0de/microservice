@@ -9,6 +9,8 @@ import com.payment_service.inventoryRequests.CartItem;
 import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
+import io.temporal.failure.ActivityFailure;
+import io.temporal.failure.ApplicationFailure;
 import io.temporal.workflow.Saga;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
@@ -24,12 +26,12 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
             ActivityOptions.newBuilder()
                     .setStartToCloseTimeout(Duration.ofMinutes(1))
                     .setTaskQueue(TaskQueue.CART_ACTIVITY_TASK_QUERY.name())
-                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
     private final ActivityOptions paymentActivityOptions =
             ActivityOptions.newBuilder()
                     .setStartToCloseTimeout(Duration.ofMinutes(1))
-                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
 
 //    private final ActivityOptions shippingActivityOptions =
@@ -74,10 +76,8 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
         Saga saga = new Saga(sagaOptions);
         try {
 
-            saga.addCompensation(cartActivities::failCart);
 
-            CartResponse cartResponse= cartActivities.getCartWithoutError(paymentDto.getCustomerId());
-            cartActivities.getCart(paymentDto.getCustomerId());
+            CartResponse cartResponse= cartActivities.getCart(paymentDto.getCustomerId());
 
             var cartItems = cartResponse.getCartItems().stream()
                     .map(item -> CartItem.builder().productId(item.getProductId()).quantity(item.getQuantity()).build())
@@ -96,9 +96,6 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //            saga.addCompensation(shippingActivities::cancelShipment, paymentDto);
 //            //Order
             paymentActivities.completePayment(paymentDto,totalAmount);
-
-            logger.info("adding failed compesation");
-
             saga.addCompensation(paymentActivities::failPayment,paymentDto,totalAmount);
 
 //            throw new RuntimeException("blah");
@@ -107,8 +104,15 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 
 
 
-        } catch (Exception e) {
-            System.out.println("you are comming");
+        } catch (ActivityFailure e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof ApplicationFailure) {
+                ApplicationFailure applicationFailure = (ApplicationFailure) cause;
+                logger.info("Failed becasue of " + applicationFailure.getOriginalMessage());
+                logger.info("cause.getMessage " + cause.getMessage());
+            } else {
+                logger.info("cause is not instance of ApplicationFailure");
+            }
             // we catch our exception and trigger workflow compensation
             saga.compensate();
             throw e;
