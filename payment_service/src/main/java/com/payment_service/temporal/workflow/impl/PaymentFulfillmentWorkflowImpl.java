@@ -2,10 +2,12 @@ package com.payment_service.temporal.workflow.impl;
 
 import com.common.TaskQueue;
 import com.common.activities.*;
+import com.common.inventoryRequests.CartItem;
 import com.common.model.CartItemDto;
 import com.common.model.PaymentDto;
+import com.common.response.BlockInventoryResponse;
 import com.common.response.CartResponse;
-import com.payment_service.inventoryRequests.CartItem;
+import com.payment_service.inventoryRequests.BlockInventoryRequest;
 import com.payment_service.temporal.workflow.PaymentFulfillmentWorkflow;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
@@ -16,6 +18,9 @@ import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflow {
@@ -34,13 +39,13 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
 //                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
                     .build();
 
-//    private final ActivityOptions shippingActivityOptions =
-//            ActivityOptions.newBuilder()
-//                    .setStartToCloseTimeout(Duration.ofMinutes(1))
-//                    .setTaskQueue(TaskQueue.SHIPPING_ACTIVITY_TASK_QUEUE.name())
-//                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
-//                    .build();
-//
+    private final ActivityOptions inventoryActivityOptions =
+            ActivityOptions.newBuilder()
+                    .setStartToCloseTimeout(Duration.ofMinutes(1))
+                    .setTaskQueue(TaskQueue.INVENTORY_ACTIVITY_TASK_QUEUE.name())
+                    .setRetryOptions(RetryOptions.newBuilder().setMaximumAttempts(3).build())
+                    .build();
+
 //    private final ActivityOptions orderActivityOptions =
 //            ActivityOptions.newBuilder()
 //                    .setStartToCloseTimeout(Duration.ofMinutes(1))
@@ -60,12 +65,14 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
     private final CartActivities cartActivities =
             Workflow.newActivityStub(CartActivities.class, cartActivityOptions);
 
+        private final InventoryActivities inventoryActivities =
+            Workflow.newActivityStub(InventoryActivities.class, inventoryActivityOptions);
+
+
 //    private final OrderActivities orderActivities =
 //            Workflow.newActivityStub(OrderActivities.class, orderActivityOptions);
 //
-//    private final InventoryActivities inventoryActivities =
-//            Workflow.newActivityStub(InventoryActivities.class, inventoryActivityOptions);
-//
+
 //    private final ShippingActivities shippingActivities =
 //            Workflow.newActivityStub(ShippingActivities.class, shippingActivityOptions);
 
@@ -85,6 +92,19 @@ public class PaymentFulfillmentWorkflowImpl implements PaymentFulfillmentWorkflo
             System.out.println(cartItems);
 
             float totalAmount = (float) cartResponse.getCartItems().stream().mapToDouble(CartItemDto::getPrice).sum();
+
+            inventoryActivities.checkInventories(cartItems);
+            List<BlockInventoryResponse> blockInventories = inventoryActivities.blockInventories(cartItems);
+            List<UUID> blockedInventoryIds = blockInventories.stream().map(BlockInventoryResponse::getId).toList();
+            saga.addCompensation(inventoryActivities::unblockInventories,blockedInventoryIds);
+            inventoryActivities.updateInventories(blockedInventoryIds);
+            saga.addCompensation(inventoryActivities::revertUpdateInventories,blockedInventoryIds);
+            inventoryActivities.unblockInventories(blockedInventoryIds);
+            saga.addCompensation(inventoryActivities::blockInventories,cartItems);
+
+
+
+
 
 //            paymentActivities.debitPayment(paymentDto);
 //            saga.addCompensation(paymentActivities::reversePayment, paymentDto);

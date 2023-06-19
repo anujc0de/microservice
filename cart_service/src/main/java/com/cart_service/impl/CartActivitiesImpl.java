@@ -18,12 +18,11 @@ public class CartActivitiesImpl implements CartActivities {
     @Override
     public CartResponse getCart(int customerId) {
 
-        throw new RuntimeException("Get Cart Failure");
 
-//        log.info("requesting to get cart with error {}", customerId);
-//        Cart fetchedCart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
-//        log.info("Finished to get cart {}", customerId);
-//        return cartMapper.cartToCartResponse(fetchedCart);
+        log.info("requesting to get cart with error {}", customerId);
+        Cart fetchedCart = cartRepository.findCartByCustomerId(customerId).orElseThrow();
+        log.info("Finished to get cart {}", customerId);
+        return cartMapper.cartToCartResponse(fetchedCart);
     }
 
 
