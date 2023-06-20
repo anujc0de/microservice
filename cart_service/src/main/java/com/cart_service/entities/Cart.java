@@ -40,7 +40,7 @@ public class Cart {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cart", cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     private Set<CartItem> cartItems = new HashSet<>();
 
 }

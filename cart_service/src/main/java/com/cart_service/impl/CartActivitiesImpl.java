@@ -45,15 +45,16 @@ public class CartActivitiesImpl implements CartActivities {
         Cart cart = getCartByCustomerId(customerId);
         List<CartItem> cartItems = new ArrayList<>(cart.getCartItems());
 
-        for (CartItem cartItem : cartItems) {
-            cartItem.setCart(null);
-            cartItemRepository.save(cartItem);
-        }
+//        for (CartItem cartItem : cartItems) {
+//            cartItem.setCart(null);
+//            cartItemRepository.save(cartItem);
+//        }
+//        cartItemRepository.deleteById(cartItems.get(0).getId());
         cartItemRepository.deleteAll(cartItems);
 
-        cart.getCartItems().clear();
+//        cart.getCartItems().clear();
 
-        cartRepository.save(cart);
+//        cartRepository.save(cart);
 
 
 
