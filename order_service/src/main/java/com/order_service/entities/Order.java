@@ -35,7 +35,7 @@ public class Order {
     private UUID paymentId;
 
     @Column
-    private OrderStatus orderStatus;
+    private String orderStatus;
 
     @Column
     @CreatedDate

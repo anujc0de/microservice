@@ -1,6 +1,7 @@
 package com.cart_service.config;
 
 import com.cart_service.impl.CartActivitiesImpl;
+import com.cart_service.repos.CartItemRepository;
 import com.cart_service.repos.CartRepository;
 import com.cart_service.temporal.orchestrator.WorkflowOrchestratorClient;
 import com.cart_service.worker.CartWorker;
@@ -15,15 +16,15 @@ import org.springframework.context.annotation.Configuration;
 public class CartServiceAppConfig {
 
   @Bean
-  public CartWorker cartWorker(CartRepository cartRepository) {
+  public CartWorker cartWorker(CartRepository cartRepository, CartItemRepository cartItemRepository) {
     return new CartWorker(
-        getCartActivity(cartRepository), workflowOrchestratorClient());
+        getCartActivity(cartRepository,cartItemRepository), workflowOrchestratorClient());
   }
 
   @Bean
   public CartActivities getCartActivity(
-      CartRepository cartRepository) {
-    return new CartActivitiesImpl(cartRepository);
+      CartRepository cartRepository,CartItemRepository cartItemRepository) {
+    return new CartActivitiesImpl(cartRepository,cartItemRepository);
   }
 
   @Bean

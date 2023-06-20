@@ -13,6 +13,7 @@ public class CartItem {
 
     private UUID productId;
     private int quantity;
+    private  float price;
 
 
 
