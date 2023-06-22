@@ -65,27 +65,27 @@ public class PaymentService {
                 .block();
 
 
-        int sleepDuration = random.nextInt(1000) + 1000;
-
-        try {
-            Thread.sleep(sleepDuration);
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        assert blockInventoryResponses != null;
+//        int sleepDuration = random.nextInt(1000) + 1000;
+//
+//        try {
+//            Thread.sleep(sleepDuration);
+//
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
+//        assert blockInventoryResponses != null;
         List<UUID> blockedInventoryIds = Arrays.stream(blockInventoryResponses).map(BlockInventoryResponse::getId).toList();
-        if (random.nextDouble() < 0.2) {
-            //unblock
-            BlockInventoryResponse[] inventoryResponses = webClientBuilder.build().put()
-                    .uri("http://localhost:8083/inventories/unblock",
-                            uriBuilder -> uriBuilder.queryParam("blockedInventoryIds", blockedInventoryIds).build())
-                    .retrieve()
-                    .bodyToMono(BlockInventoryResponse[].class)
-                    .block();
-
-            throw new RuntimeException("Payment failed. Please try again.");
-        }
+//        if (random.nextDouble() < 0.2) {
+//            //unblock
+//            BlockInventoryResponse[] inventoryResponses = webClientBuilder.build().put()
+//                    .uri("http://localhost:8083/inventories/unblock",
+//                            uriBuilder -> uriBuilder.queryParam("blockedInventoryIds", blockedInventoryIds).build())
+//                    .retrieve()
+//                    .bodyToMono(BlockInventoryResponse[].class)
+//                    .block();
+//
+//            throw new RuntimeException("Payment failed. Please try again.");
+//        }
 
         float totalAmount = (float) cartResponse.getCartItems().stream().mapToDouble(CartItemDto::getPrice).sum();
 
