@@ -30,7 +30,7 @@ public class WorkflowOrchestratorImpl implements WorkflowOrchestrator {
             PaymentFulfillmentWorkflow.class,
             WorkflowOptions.newBuilder()
                 .setWorkflowId(applicationProperties.getWorkflowId() + "-" + paymentDto.getId())
-                    .setWorkflowExecutionTimeout(Duration.ofSeconds(20))
+                    .setWorkflowExecutionTimeout(Duration.ofMinutes(2))
                 .setTaskQueue(TaskQueue.PAYMENT_FULFILLMENT_WORKFLOW_TASK_QUEUE.name())
                 .build());
     // Execute Sync
