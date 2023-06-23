@@ -7,7 +7,10 @@ import com.inventory_service.repos.BlockInventoryRepository;
 import com.inventory_service.repos.InventoryRepository;
 import com.inventory_service.request.BlockInventoryRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,7 +20,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final BlockInventoryRepository blockInventoryRepository;
@@ -25,7 +30,7 @@ public class InventoryService {
     public List<Inventory> getInventoriesByProductIds(List<UUID> productIds) {
         return inventoryRepository.findByProductIdIn(productIds);
     }
-    public   List<BlockInventory>  checkAndBlockInventories(BlockInventoryRequest blockInventoryRequest){
+    public List<BlockInventory> checkAndBlockInventories(BlockInventoryRequest blockInventoryRequest){
         var productIds=blockInventoryRequest.getCartItems().stream().map(CartItem::getProductId).toList();
         Instant currentTime = Instant.now();
         List<Object[]> result= blockInventoryRepository.findTotalQuantityByProductIds(productIds, currentTime);
@@ -47,6 +52,9 @@ public class InventoryService {
             int totalQuantity = inventory.getQuantity();
             int blockedQuantity = quantityMap.getOrDefault(productId, 0);
             int availableQuantity = totalQuantity - blockedQuantity;
+            log.info("totalQuantity " + totalQuantity);
+            log.info("blockedQuantity " + blockedQuantity);
+            log.info("availableQuantity " + availableQuantity);
             int requestedQuantity=requestedMap.getOrDefault(productId, 0);
 
             if (availableQuantity < requestedQuantity) {

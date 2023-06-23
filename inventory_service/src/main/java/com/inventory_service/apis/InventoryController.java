@@ -17,7 +17,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/inventories")
 @RequiredArgsConstructor
-@Transactional
 public class InventoryController {
 
     Logger log = LoggerFactory.getLogger(InventoryController.class);
@@ -33,7 +32,7 @@ public class InventoryController {
     }
 
     @PostMapping("/check")
-    public  ResponseEntity<?> checkAndBlockInventories( @RequestBody BlockInventoryRequest blockInventoryRequest){
+    public ResponseEntity<?> checkAndBlockInventories( @RequestBody BlockInventoryRequest blockInventoryRequest){
 
         log.info("requested check inventory for products and block inventories");
         var saved=inventoryService.checkAndBlockInventories(blockInventoryRequest);
