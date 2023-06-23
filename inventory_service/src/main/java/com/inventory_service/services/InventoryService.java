@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(isolation = Isolation.SERIALIZABLE)
 public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final BlockInventoryRepository blockInventoryRepository;
